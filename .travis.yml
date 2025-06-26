@@ -1,0 +1,15 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t itiburski/s10-multi-react-test -f ./client/Dockerfile.dev ./client
+
+script
+  - docker run itiburski/s10-multi-react-test npm test -- --coverage
+
+after_success:
+  - docker build -t itiburski/s10-multi-client ./client
+  - docker build -t itiburski/s10-multi-nginx ./nginx
+  - docker build -t itiburski/s10-multi-server ./server
+  - docker build -t itiburski/s10-multi-worker ./worker
