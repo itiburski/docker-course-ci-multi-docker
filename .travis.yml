@@ -3,13 +3,22 @@ services:
   - docker
 
 before_install:
-  - docker build -t itiburski/s10-multi-react-test -f ./client/Dockerfile.dev ./client
+  - docker build -t itiburski/docker-course-multi-react-test -f ./client/Dockerfile.dev ./client
 
 script
-  - docker run itiburski/s10-multi-react-test npm test -- --coverage
+  - docker run itiburski/docker-course-multi-react-test npm test -- --coverage
 
 after_success:
-  - docker build -t itiburski/s10-multi-client ./client
-  - docker build -t itiburski/s10-multi-nginx ./nginx
-  - docker build -t itiburski/s10-multi-server ./server
-  - docker build -t itiburski/s10-multi-worker ./worker
+  - docker build -t itiburski/docker-course-multi-client ./client
+  - docker build -t itiburski/docker-course-multi-nginx ./nginx
+  - docker build -t itiburski/docker-course-multi-server ./server
+  - docker build -t itiburski/docker-course-multi-worker ./worker
+  # log in to the docker CLI
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  # Take those images and push them to docker hub
+  - docker push itiburski/docker-course-multi-client
+  - docker push itiburski/docker-course-multi-nginx
+  - docker push itiburski/docker-course-multi-server
+  - docker push itiburski/docker-course-multi-worker
+  
