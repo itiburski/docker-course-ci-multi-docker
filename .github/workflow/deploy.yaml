@@ -1,0 +1,33 @@
+name: Deploy docker-course-ci-multi-docker
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: log in to the docker CLI
+        run: docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
+
+      - name: tests
+        run: |
+          docker build -t itiburski/docker-course-multi-client-test -f ./client/Dockerfile.dev ./client
+          docker run -e CI=true itiburski/docker-course-multi-client-test npm test -- --coverage
+
+      - name: Generate deployment images
+        run: |
+          docker build -t itiburski/docker-course-multi-client ./client
+          docker build -t itiburski/docker-course-multi-nginx ./nginx
+          docker build -t itiburski/docker-course-multi-server ./server
+          docker build -t itiburski/docker-course-multi-worker ./worker
+
+      # Take those images and push them to docker hub
+      - name: push images to docker hub
+        run: |
+          docker push itiburski/docker-course-multi-client
+          docker push itiburski/docker-course-multi-nginx
+          docker push itiburski/docker-course-multi-server
+          docker push itiburski/docker-course-multi-worker
